@@ -1,0 +1,88 @@
+/* MAIN BACKGROUND */
+.root {
+    -fx-font-family: "Segoe UI", "Sans-Serif";
+    -fx-background-color: #16325B;
+}
+
+/* TITLE */
+.title-label {
+    -fx-text-fill: white;
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 12, 0.5, 0, 3);
+}
+
+/* GAME BOARD BUTTONS */
+.cell-button {
+    -fx-background-color: #227B94;
+    -fx-text-fill: white;
+    -fx-font-size: 48px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 26;
+    -fx-border-radius: 26;
+    -fx-border-color: rgba(255,255,255,0.3);
+    -fx-border-width: 3;
+}
+.cell-button:hover {
+    -fx-background-color: #78B7D0;
+}
+
+/* CARDS */
+.card {
+    -fx-background-color: #1A3B63;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-border-color: #78B7D0;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 20, 0.4, 0, 5);
+}
+
+.card-title {
+    -fx-text-fill: #FFDC7F;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+/* TEXT STYLES */
+.section-label {
+    -fx-text-fill: #E0ECFF;
+    -fx-font-size: 18px;
+}
+.info-label {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 16px;
+}
+.score-label {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+/* BUTTON STYLING */
+.button {
+    -fx-background-color: #227B94;
+    -fx-text-fill: white;
+    -fx-background-radius: 26;
+    -fx-border-radius: 26;
+    -fx-padding: 10 22;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+.button:hover {
+    -fx-background-color: #78B7D0;
+}
+
+/* DROPDOWNS / RADIO BUTTONS */
+.combo-box, .radio-button {
+    -fx-font-size: 16px;
+    -fx-text-fill: white;
+}
+
+/* STATUS BAR */
+#bottom-bar {
+    -fx-background-color: #102644;
+}
+.status-label {
+    -fx-text-fill: #FFDC7F;
+    -fx-font-size: 16px;
+}

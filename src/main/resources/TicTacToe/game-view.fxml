@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            prefWidth="1150" prefHeight="700"
+            fx:controller="TicTacToe.GameController">
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox alignment="CENTER">
+            <padding><Insets top="25" bottom="18"/></padding>
+            <children>
+                <Label text="Tic Tac Toe AI" styleClass="title-label"/>
+            </children>
+        </HBox>
+    </top>
+
+    <!-- CENTER BOARD -->
+    <center>
+        <StackPane alignment="CENTER">
+            <children>
+                <GridPane fx:id="boardGrid" id="board-grid"
+                          hgap="20" vgap="20">
+                    <padding><Insets top="20" right="20" left="20" bottom="20"/></padding>
+                </GridPane>
+            </children>
+        </StackPane>
+    </center>
+
+    <!-- RIGHT SIDE (TWO CARDS) -->
+    <right>
+        <VBox spacing="25" alignment="TOP_CENTER" prefWidth="330">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+            <!-- SETTINGS CARD -->
+            <VBox styleClass="card" spacing="16">
+                <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                <children>
+
+                    <Label text="Game Settings" styleClass="card-title"/>
+
+                    <Label text="Play as:" styleClass="section-label"/>
+                    <HBox spacing="12">
+                        <children>
+                            <RadioButton fx:id="xRadio" text="X"/>
+                            <RadioButton fx:id="oRadio" text="O"/>
+                        </children>
+                    </HBox>
+
+                    <Label text="Difficulty:" styleClass="section-label"/>
+                    <ComboBox fx:id="difficultyCombo" prefWidth="200"/>
+
+                    <Label text="Evaluation:" styleClass="section-label"/>
+                    <ComboBox fx:id="evalCombo" prefWidth="200"/>
+
+                    <HBox spacing="10">
+                        <children>
+                            <Button fx:id="startButton" text="Start Game" onAction="#onStartGame"/>
+                            <Button fx:id="resetButton" text="Reset" onAction="#onResetClicked"/>
+                        </children>
+                    </HBox>
+                </children>
+            </VBox>
+
+            <!-- INFO CARD -->
+            <VBox styleClass="card" spacing="14">
+                <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                <children>
+
+                    <Label text="Game Info" styleClass="card-title"/>
+
+                    <Label fx:id="statusMiniLabel" text="Ready."
+                           wrapText="true" styleClass="info-label"/>
+
+                    <Label text="AI Move:" styleClass="section-label"/>
+                    <Label fx:id="aiInfoLabel" text="-" wrapText="true"
+                           styleClass="info-label"/>
+
+                    <Label text="Score:" styleClass="section-label"/>
+                    <Label fx:id="scoreLabel" text="You 0 : 0 AI   |   Draws 0"
+                           styleClass="score-label"/>
+                </children>
+            </VBox>
+
+        </VBox>
+    </right>
+
+    <!-- BOTTOM STATUS BAR -->
+    <bottom>
+        <HBox id="bottom-bar" alignment="CENTER_LEFT">
+            <padding><Insets top="12" bottom="12" left="25"/></padding>
+            <children>
+                <Label fx:id="statusLabel" text="Welcome to Tic Tac Toe AI."
+                       styleClass="status-label"/>
+            </children>
+        </HBox>
+    </bottom>
+
+</BorderPane>
