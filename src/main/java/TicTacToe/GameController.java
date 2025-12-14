@@ -4,33 +4,45 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
+import java.io.IOException;
 import java.util.List;
 
 public class GameController {
 
     @FXML private GridPane boardGrid;
-
     @FXML private RadioButton xRadio, oRadio;
     @FXML private ComboBox<String> difficultyCombo, evalCombo;
     @FXML private Button startButton, resetButton;
-
     @FXML private Label statusLabel, statusMiniLabel, aiInfoLabel, scoreLabel;
 
     private ToggleGroup playerToggleGroup;
-
     private Board board;
     private Player humanPlayer;
     private Player aiPlayer;
     private Player currentPlayer;
-
     private Button[][] cellButtons = new Button[3][3];
 
     private int humanWins = 0;
     private int aiWins = 0;
     private int draws = 0;
 
+    // ML model shared by the game
+    private static MLModel mlModel = new MLModel();
+
     @FXML
     public void initialize() {
+        // train ML model once
+        try {
+            // path to your CSV in the project
+            mlModel.trainFromCsv("src/main/resources/tictactoe_dataset.csv",
+                    0.7,  // 70% train
+                    5000, // epochs
+                    0.03  // learning rate
+            );
+            AlphaBeta.setMLModel(mlModel);
+        } catch (IOException e) {
+            System.err.println("Could not train ML model: " + e.getMessage());
+        }
 
         // Toggle group for X/O
         playerToggleGroup = new ToggleGroup();
@@ -44,7 +56,7 @@ public class GameController {
 
         // Evaluation choice
         evalCombo.getItems().addAll("Classical heuristic", "ML evaluation");
-        evalCombo.getSelectionModel().select(0);
+        evalCombo.getSelectionModel().select("Classical heuristic");
 
 
         buildBoardGrid();
@@ -70,18 +82,17 @@ public class GameController {
 
         for (int r = 0; r < 3; r++) {
             for (int c = 0; c < 3; c++) {
-
                 Button btn = new Button();
                 btn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
                 btn.getStyleClass().add("cell-button");
 
-                // keep board big
-                btn.prefWidthProperty().bind(boardGrid.widthProperty().divide(3).subtract(30));
-                btn.prefHeightProperty().bind(boardGrid.heightProperty().divide(3).subtract(30));
+                btn.prefWidthProperty()
+                        .bind(boardGrid.widthProperty().divide(3).subtract(30));
+                btn.prefHeightProperty()
+                        .bind(boardGrid.heightProperty().divide(3).subtract(30));
 
                 final int row = r;
                 final int col = c;
-
                 btn.setOnAction(e -> handleHumanMove(row, col));
 
                 cellButtons[r][c] = btn;
@@ -95,15 +106,30 @@ public class GameController {
         humanPlayer = xRadio.isSelected() ? Player.X : Player.O;
         aiPlayer = humanPlayer.opposite();
 
+        // choose evaluation mode
+        String eval = evalCombo.getValue();
+        boolean useML = "ML evaluation".equals(eval);
+        AlphaBeta.setUseML(useML);
+
+        if (useML) {
+            if (mlModel != null && mlModel.isTrained()) {
+                statusMiniLabel.setText("Difficulty: " + difficultyCombo.getValue()
+                        + " | Eval: ML (trained, 70/30 split)");
+            } else {
+                statusMiniLabel.setText("ML not trained – using classical instead.");
+                AlphaBeta.setUseML(false);
+            }
+        } else {
+            statusMiniLabel.setText("Difficulty: " + difficultyCombo.getValue()
+                    + " | Eval: Classical heuristic");
+        }
+
         resetGameState();
 
         statusLabel.setText("Game started. You are " + humanPlayer + ".");
-        statusMiniLabel.setText("Difficulty: " + difficultyCombo.getValue()
-                + " | Eval: " + evalCombo.getValue());
         aiInfoLabel.setText("-");
 
-        // Human is MAX, but X always moves first.
-        // If human chose O, AI (as X) plays first.
+        // X always moves first
         currentPlayer = Player.X;
         if (currentPlayer == aiPlayer) {
             aiMove();
@@ -116,14 +142,12 @@ public class GameController {
         statusLabel.setText("Welcome to Tic Tac Toe AI.");
         statusMiniLabel.setText("Ready.");
         aiInfoLabel.setText("-");
-        // If you want reset scores too, uncomment:
-        // humanWins = 0; aiWins = 0; draws = 0; updateScoreLabel();
+        updateScoreLabel();
     }
 
     private void resetGameState() {
         board = new Board();
         currentPlayer = Player.X;
-
         for (int r = 0; r < 3; r++) {
             for (int c = 0; c < 3; c++) {
                 cellButtons[r][c].setDisable(false);
@@ -145,7 +169,6 @@ public class GameController {
         }
 
         playMove(row, col, humanPlayer);
-
         if (checkGameOver()) return;
 
         currentPlayer = aiPlayer;
@@ -156,35 +179,32 @@ public class GameController {
         if (board.isTerminal()) return;
         if (currentPlayer != aiPlayer) return;
 
-        // Show all possible AI evaluations
-        List<String> evals = AlphaBeta.getAllMoveEvaluations(
-                board,
-                humanPlayer,
-                aiPlayer,
-                getDepthFromDifficulty()
-        );
+        int depth = getDepthFromDifficulty();
 
-        StringBuilder sb = new StringBuilder("AI Evaluations:\n");
-        for (String s : evals) sb.append(s).append("\n");
+        // Show all possible move evaluations
+        List<String> evals = AlphaBeta.getAllMoveEvaluations(
+                board, humanPlayer, aiPlayer, depth);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("AI Evaluations (")
+                .append(evalCombo.getValue())
+                .append("):\n");
+        for (String s : evals) {
+            sb.append(s).append("\n");
+        }
         aiInfoLabel.setText(sb.toString());
 
         // Choose best move (AI = MIN)
         Move bestMove = AlphaBeta.findBestMoveForAI(
-                board,
-                humanPlayer,
-                aiPlayer,
-                getDepthFromDifficulty()
-        );
+                board, humanPlayer, aiPlayer, depth);
 
         if (bestMove == null) return;
 
         playMove(bestMove.getRow(), bestMove.getCol(), aiPlayer);
-
         if (checkGameOver()) return;
 
         currentPlayer = humanPlayer;
     }
-
 
     private void playMove(int row, int col, Player player) {
         board.setCell(row, col, player);
@@ -227,35 +247,12 @@ public class GameController {
     }
 
     private void updateScoreLabel() {
-        scoreLabel.setText(
-                "You " + humanWins + " : " + aiWins + " AI   |   Draws " + draws
-        );
-    }
-
-    /**
-     * Use difficulty + evaluation choice to pick the AI move.
-     * HUMAN is MAX, AI is MIN.
-     */
-    private Move computeBestMoveUsingAI() {
-        int depth = getDepthFromDifficulty();
-        String eval = evalCombo.getValue();
-
-        Move move;
-        if ("Classical heuristic".equals(eval)) {
-            move = AlphaBeta.findBestMoveForAI(board, humanPlayer, aiPlayer, depth);
-        } else {
-            // later we change this to use ML evaluation
-            move = AlphaBeta.findBestMoveForAI(board, humanPlayer, aiPlayer, depth);
-            statusMiniLabel.setText("Using classical evaluation (ML not implemented yet).");
-        }
-
-        return move;
+        scoreLabel.setText("You " + humanWins + " : " + aiWins + " AI | Draws " + draws);
     }
 
     private int getDepthFromDifficulty() {
         String diff = difficultyCombo.getValue();
         if (diff == null) return 3;
-
         switch (diff) {
             case "Easy":
                 return 2;
