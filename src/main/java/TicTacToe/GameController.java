@@ -46,9 +46,11 @@ public class GameController {
         evalCombo.getItems().addAll("Classical heuristic", "ML evaluation");
         evalCombo.getSelectionModel().select(0);
 
+
         buildBoardGrid();
         resetGameState();
         updateScoreLabel();
+
     }
 
     private void buildBoardGrid() {
