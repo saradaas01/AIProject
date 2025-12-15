@@ -39,8 +39,8 @@ public class AlphaBeta {
             next.setCell(move.getRow(), move.getCol(), aiPlayer);
 
             int score = alphaBeta(next,
-                    humanPlayer,  // human is MAX
-                    humanPlayer,
+                    humanPlayer,      // next turn is human
+                    humanPlayer,      // human is MAX
                     depth - 1,
                     Integer.MIN_VALUE,
                     Integer.MAX_VALUE);

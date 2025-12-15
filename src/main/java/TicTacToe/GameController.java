@@ -257,7 +257,7 @@ public class GameController {
             case "Easy":
                 return 2;
             case "Hard":
-                return 6;
+                return 9;
             default:
                 return 4; // Medium
         }

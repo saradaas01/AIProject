@@ -8,7 +8,7 @@ import java.util.*;
 public class MLModel {
 
     private static final int INPUT_SIZE = 6;   // f1..f6
-    private static final int HIDDEN_SIZE = 7;  // you asked for 7 neurons
+    private static final int HIDDEN_SIZE = 10;
 
     private double[][] w1; // [hidden][input]
     private double[] b1;   // [hidden]
