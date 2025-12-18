@@ -7,12 +7,12 @@ import java.util.*;
 
 public class MLModel {
 
-    private static final int INPUT_SIZE = 6;   // f1..f6
-    private static final int HIDDEN_SIZE = 32;
+    private static final int INPUT_SIZE = 6;
+    private static final int HIDDEN_SIZE = 10;
 
-    private double[][] w1; // [hidden][input]
-    private double[] b1;   // [hidden]
-    private double[] w2;   // [hidden]
+    private double[][] w1;
+    private double[] b1;
+    private double[] w2;
     private double b2;
 
     private boolean trained = false;
@@ -29,7 +29,7 @@ public class MLModel {
 
         for (int j = 0; j < HIDDEN_SIZE; j++) {
             for (int i = 0; i < INPUT_SIZE; i++) {
-                w1[j][i] = (rnd.nextDouble() - 0.5) * 0.5; // small random
+                w1[j][i] = (rnd.nextDouble() - 0.5) * 0.5;
             }
             b1[j] = 0.0;
             w2[j] = (rnd.nextDouble() - 0.5) * 0.5;
@@ -37,16 +37,8 @@ public class MLModel {
         b2 = 0.0;
     }
 
-    /**
-     * Train on CSV file:
-     * columns: f1_X_count,f2_O_count,f3_X_almost_win,f4_O_almost_win,
-     *          f5_X_center,f6_X_corners,label
-     * label is +1 or -1
-     */
-    public void trainFromCsv(String path,
-                             double trainRatio,
-                             int epochs,
-                             double learningRate) throws IOException {
+
+    public void trainFromCsv(String path,double trainRatio,int epochs,double learningRate) throws IOException {
 
         List<double[]> featureList = new ArrayList<>();
         List<Double> labelList = new ArrayList<>();
@@ -54,7 +46,6 @@ public class MLModel {
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
 
-            // skip header
             line = br.readLine();
 
             while ((line = br.readLine()) != null) {
@@ -68,17 +59,16 @@ public class MLModel {
                 for (int i = 0; i < INPUT_SIZE; i++) {
                     x[i] = Double.parseDouble(parts[i]);
                 }
-
-                // normalize counts to [0,1] (max is about 5)
-                x[0] /= 5.0; // X_count
-                x[1] /= 5.0; // O_count
-                x[2] /= 5.0; // X_almost_win (0..3)
-                x[3] /= 5.0; // O_almost_win
-                x[4] /= 1.0; // X_center is already 0 or 1
-                x[5] /= 5.0; // X_corners (0..4)
+                
+                x[0] /= 5.0;
+                x[1] /= 5.0;
+                x[2] /= 5.0;
+                x[3] /= 5.0;
+                x[4] /= 1.0;
+                x[5] /= 5.0;
 
                 double label = Double.parseDouble(parts[6]);
-                label = (label >= 0) ? 1.0 : -1.0; // ensure ±1
+                label = (label >= 0) ? 1.0 : -1.0;
 
                 featureList.add(x);
                 labelList.add(label);
@@ -91,9 +81,8 @@ public class MLModel {
             return;
         }
 
-        // shuffle together
         int[] idx = new int[n];
-        for (int i = 0; i < n; i++) idx[i] = i;
+        for (int i = 0; i < n; i++) idx[i]= i;
         Random rnd = new Random(42);
         for (int i = n - 1; i > 0; i--) {
             int j = rnd.nextInt(i + 1);
@@ -114,7 +103,7 @@ public class MLModel {
         if (trainSize > n - 1) trainSize = n - 1;
         int testSize = n - trainSize;
 
-        // ---- training loop ----
+
         for (int epoch = 0; epoch < epochs; epoch++) {
             double totalLoss = 0.0;
 
@@ -122,7 +111,7 @@ public class MLModel {
                 double[] x = X[i];
                 double target = Y[i];
 
-                // forward
+
                 double[] hidden = new double[HIDDEN_SIZE];
                 for (int j = 0; j < HIDDEN_SIZE; j++) {
                     double z = b1[j];
@@ -136,13 +125,12 @@ public class MLModel {
                 for (int j = 0; j < HIDDEN_SIZE; j++) {
                     z2 += w2[j] * hidden[j];
                 }
-                double out = Math.tanh(z2); // in [-1,1]
+                double out = Math.tanh(z2);
 
-                // loss = (out - target)^2
+
                 double diff = out - target;
                 totalLoss += diff * diff;
 
-                // ---- backprop ----
                 double dL_dout = 2 * diff;
                 double dOut_dZ2 = 1 - out * out;
                 double dL_dZ2 = dL_dout * dOut_dZ2;
@@ -154,7 +142,6 @@ public class MLModel {
                 }
                 b2 -= learningRate * dL_dZ2;
 
-                // backprop to hidden / w1 / b1
                 for (int j = 0; j < HIDDEN_SIZE; j++) {
                     double dL_dHj = dL_dZ2 * w2[j];
                     double dHj_dZj = 1 - hidden[j] * hidden[j];
@@ -175,7 +162,6 @@ public class MLModel {
             }
         }
 
-        // ---- test accuracy ----
         int correct = 0;
         for (int i = trainSize; i < n; i++) {
             double out = forward(X[i]);
@@ -190,7 +176,6 @@ public class MLModel {
         trained = true;
     }
 
-    // forward only (no gradient)
     private double forward(double[] x) {
         double[] hidden = new double[HIDDEN_SIZE];
         for (int j = 0; j < HIDDEN_SIZE; j++) {
@@ -212,12 +197,7 @@ public class MLModel {
         return trained;
     }
 
-    /**
-     * Evaluate board from HUMAN perspective using this ML model.
-     * Internally the model is trained from X's perspective:
-     *  +1 = good for X, -1 = good for O.
-     * So if human is O we flip the sign.
-     */
+
     public double evaluateBoard(Board board, Player humanPlayer) {
         double[] featsForX = extractFeaturesForX(board);
 
@@ -226,7 +206,6 @@ public class MLModel {
         featsForX[1] /= 5.0;
         featsForX[2] /= 5.0;
         featsForX[3] /= 5.0;
-        // featsForX[4] is 0/1
         featsForX[5] /= 5.0;
 
         double scoreForX = forward(featsForX);
@@ -240,7 +219,6 @@ public class MLModel {
         }
     }
 
-    // ===== feature extraction exactly like your CSV header =====
     private double[] extractFeaturesForX(Board board) {
         int f1_X_count = 0;
         int f2_O_count = 0;
@@ -258,12 +236,11 @@ public class MLModel {
             }
         }
 
-        // center
+
         if (board.getCell(1, 1) == Player.X) {
             f5_X_center = 1;
         }
 
-        // corners
         int[][] corners = {{0,0},{0,2},{2,0},{2,2}};
         for (int[] co : corners) {
             if (board.getCell(co[0], co[1]) == Player.X) {
@@ -271,7 +248,6 @@ public class MLModel {
             }
         }
 
-        // almost-win lines
         int[][] lines = {
                 {0,0, 0,1, 0,2},
                 {1,0, 1,1, 1,2},
@@ -300,13 +276,7 @@ public class MLModel {
             if (oCount == 2 && xCount == 0) f4_O_almost++;
         }
 
-        return new double[]{
-                f1_X_count,
-                f2_O_count,
-                f3_X_almost,
-                f4_O_almost,
-                f5_X_center,
-                f6_X_corners
+        return new double[]{f1_X_count, f2_O_count,f3_X_almost, f4_O_almost, f5_X_center,f6_X_corners
         };
     }
 }

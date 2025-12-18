@@ -33,7 +33,7 @@ public class GameController {
     public void initialize() {
         // train ML model once
         try {
-            // path to your CSV in the project
+
             mlModel.trainFromCsv("src/main/resources/tictactoe_dataset.csv",
                     0.7,  // 70% train
                     5000, // epochs
@@ -44,7 +44,7 @@ public class GameController {
             System.err.println("Could not train ML model: " + e.getMessage());
         }
 
-        // Toggle group for X/O
+
         playerToggleGroup = new ToggleGroup();
         xRadio.setToggleGroup(playerToggleGroup);
         oRadio.setToggleGroup(playerToggleGroup);
@@ -57,7 +57,6 @@ public class GameController {
         // Evaluation choice
         evalCombo.getItems().addAll("Classical heuristic", "ML evaluation");
         evalCombo.getSelectionModel().select("Classical heuristic");
-
 
         buildBoardGrid();
         resetGameState();
@@ -106,7 +105,7 @@ public class GameController {
         humanPlayer = xRadio.isSelected() ? Player.X : Player.O;
         aiPlayer = humanPlayer.opposite();
 
-        // choose evaluation mode
+
         String eval = evalCombo.getValue();
         boolean useML = "ML evaluation".equals(eval);
         AlphaBeta.setUseML(useML);
@@ -129,7 +128,7 @@ public class GameController {
         statusLabel.setText("Game started. You are " + humanPlayer + ".");
         aiInfoLabel.setText("-");
 
-        // X always moves first
+
         currentPlayer = Player.X;
         if (currentPlayer == aiPlayer) {
             aiMove();
@@ -162,10 +161,10 @@ public class GameController {
             return;
         }
         if (currentPlayer != humanPlayer) {
-            return; // not your turn
+            return;
         }
         if (!board.isEmptyCell(row, col)) {
-            return; // already used
+            return;
         }
 
         playMove(row, col, humanPlayer);
@@ -181,7 +180,7 @@ public class GameController {
 
         int depth = getDepthFromDifficulty();
 
-        // Show all possible move evaluations
+
         List<String> evals = AlphaBeta.getAllMoveEvaluations(
                 board, humanPlayer, aiPlayer, depth);
 
@@ -194,7 +193,7 @@ public class GameController {
         }
         aiInfoLabel.setText(sb.toString());
 
-        // Choose best move (AI = MIN)
+
         Move bestMove = AlphaBeta.findBestMoveForAI(
                 board, humanPlayer, aiPlayer, depth);
 
@@ -259,7 +258,7 @@ public class GameController {
             case "Hard":
                 return 9;
             default:
-                return 4; // Medium
+                return 4;
         }
     }
 }

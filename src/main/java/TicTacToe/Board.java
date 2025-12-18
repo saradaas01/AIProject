@@ -17,7 +17,6 @@ public class Board {
         }
     }
 
-    // Copy constructor (useful for AI search)
     public Board(Board other) {
         cells = new Player[SIZE][SIZE];
         for (int r = 0; r < SIZE; r++) {
@@ -28,14 +27,17 @@ public class Board {
     }
 
     public Player getCell(int row, int col) {
+
         return cells[row][col];
     }
 
     public void setCell(int row, int col, Player p) {
+
         cells[row][col] = p;
     }
 
     public boolean isEmptyCell(int row, int col) {
+
         return cells[row][col] == Player.EMPTY;
     }
 
@@ -62,44 +64,36 @@ public class Board {
         return true;
     }
 
-    // Returns X, O, or EMPTY if no winner yet. (We’ll handle draw separately.)
     public Player getWinner() {
-        // rows
+
         for (int r = 0; r < SIZE; r++) {
-            if (cells[r][0] != Player.EMPTY &&
-                    cells[r][0] == cells[r][1] &&
-                    cells[r][1] == cells[r][2]) {
+            if (cells[r][0] != Player.EMPTY && cells[r][0] == cells[r][1] && cells[r][1] == cells[r][2]) {
                 return cells[r][0];
             }
         }
 
-        // columns
+
         for (int c = 0; c < SIZE; c++) {
-            if (cells[0][c] != Player.EMPTY &&
-                    cells[0][c] == cells[1][c] &&
-                    cells[1][c] == cells[2][c]) {
+            if (cells[0][c] != Player.EMPTY && cells[0][c] == cells[1][c] && cells[1][c] == cells[2][c]) {
                 return cells[0][c];
             }
         }
 
-        // main diagonal
-        if (cells[0][0] != Player.EMPTY &&
-                cells[0][0] == cells[1][1] &&
-                cells[1][1] == cells[2][2]) {
+
+        if (cells[0][0] != Player.EMPTY && cells[0][0] == cells[1][1] && cells[1][1] == cells[2][2]) {
             return cells[0][0];
         }
 
-        // other diagonal
-        if (cells[0][2] != Player.EMPTY &&
-                cells[0][2] == cells[1][1] &&
-                cells[1][1] == cells[2][0]) {
+
+        if (cells[0][2] != Player.EMPTY && cells[0][2] == cells[1][1] && cells[1][1] == cells[2][0]) {
             return cells[0][2];
         }
 
-        return Player.EMPTY; // no winner yet
+        return Player.EMPTY;
     }
 
     public boolean isTerminal() {
+
         return getWinner() != Player.EMPTY || isFull();
     }
 }

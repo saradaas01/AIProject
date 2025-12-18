@@ -3,8 +3,7 @@ package TicTacToe;
 public class FeatureExtractor {
 
     public static int[] extractFeatures(Board board, Player humanPlayer) {
-        // We assume dataset was built from X’s perspective.
-        // So we treat X as "reference player".
+
         Player aiPlayer = humanPlayer.opposite();
 
         int f1_X_count = 0;
@@ -14,7 +13,7 @@ public class FeatureExtractor {
         int f5_X_center = 0;
         int f6_X_corners = 0;
 
-        // Count X and O
+
         for (int r = 0; r < 3; r++) {
             for (int c = 0; c < 3; c++) {
                 Player p = board.getCell(r, c);
@@ -23,12 +22,12 @@ public class FeatureExtractor {
             }
         }
 
-        // X center
+
         if (board.getCell(1, 1) == Player.X) {
             f5_X_center = 1;
         }
 
-        // X corners
+
         int[][] corners = { {0,0}, {0,2}, {2,0}, {2,2} };
         for (int[] cc : corners) {
             if (board.getCell(cc[0], cc[1]) == Player.X) {
@@ -36,7 +35,7 @@ public class FeatureExtractor {
             }
         }
 
-        // Almost-win lines for X and O
+
         int[][] lines = {
                 {0,0, 0,1, 0,2},
                 {1,0, 1,1, 1,2},
@@ -66,13 +65,7 @@ public class FeatureExtractor {
             if (or == 2 && empty == 1) f4_O_almost++;
         }
 
-        return new int[] {
-                f1_X_count,
-                f2_O_count,
-                f3_X_almost,
-                f4_O_almost,
-                f5_X_center,
-                f6_X_corners
+        return new int[] {f1_X_count, f2_O_count,f3_X_almost, f4_O_almost,f5_X_center,f6_X_corners
         };
     }
 }

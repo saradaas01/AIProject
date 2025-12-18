@@ -12,7 +12,6 @@ public class Move {
 
     public int getRow() { return row; }
     public int getCol() { return col; }
-
     public int getScore() { return score; }
     public void setScore(int s) { score = s; }
 }
